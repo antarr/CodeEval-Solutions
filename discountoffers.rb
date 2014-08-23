@@ -6,31 +6,35 @@ def share_mulitple n, m
 end
 
 def find_sutability product, customer
-  ss  = share_mulitple(product.length, customer.length) ? 1.5 : 1.0
   if product.length.even?
-    ss *= customer.scan(/[aeiouy]/i).length*1.5
+    ss = customer.scan(/[aeiouy]/i).count*1.5
   else
-    ss *= customer.scan(/[^aeiouy]/i).length*1.0
+    ss = customer.scan(/[^aeiouy]/i).count*1.0
   end
-  ss
+  ss  *= share_mulitple(product.length, customer.length) ? 1.5 : 1.0
 end
 
-File.open(ARGV[0]).readlines.each do |line|
-  line = line.chomp.gsub(/[^a-z\,\;]/i,'')
+lines = []
+
+File.open(ARGV[0]).readlines.each{ |line| lines << line.gsub(/[^a-z\,\;]/i,'') }
+
+lines.each do |line|
   cust_str, prod_str = line.split(/[;]/i)
   next unless prod_str
   customers = cust_str.split(/[,]/i)
   next unless customers
   products = prod_str.split(/[,]/i)
   next unless products
-  maxs = []
-  customers.each do |customer|
-    sutability_hash = Hash.new
-    products.each do |product|
-      sutability_hash[product.to_s] = find_sutability(product, customer)
+  pairs = products.product(customers)
+  maxes = 0
+  products.each do |prod|
+    max = 0
+    product_pairs = pairs.select{ |c| c[0] = prod}
+    product_pairs.each do |pair|
+      ss = find_sutability(pair.first, pair.last)
+      max = ss unless max >= ss
     end
-    maxs << sutability_hash.values.max
+    maxes +=max
   end
-  next unless maxs.count > 0
-  puts '%.2f' % maxs.inject(:+)
+ puts '%.2f' % maxes
 end
