@@ -1,40 +1,42 @@
 ARGV[0] = "dscntoffer.txt"
 
-def share_mulitple n, m
-  intersect =[n,m].inject(:lcm)
-  return intersect <= n || intersect <= m
+def have_common_factor n, m
+  (n % m == 0) || (m % n == 0)
 end
 
-def find_sutability product, customer
-  if product.length.even?
-    ss = customer.scan(/[aeiouy]/i).count*1.5
-  else
-    ss = customer.scan(/[^aeiouy]/i).count*1.0
-  end
-  ss  *= share_mulitple(product.length, customer.length) ? 1.5 : 1.0
+def find_sutability cust, prod
+  cust_l, prod_l = cust.length, prod.length
+  ss = prod_l.even? ? cust.scan(/[aeiouy]/i).length*1.5 : cust.scan(/[^aeiouy]/i).length.to_f*1.0
+  ss *= have_common_factor(prod_l, cust_l) ? 1.5 : 1.0
 end
 
 lines = []
-
-File.open(ARGV[0]).readlines.each{ |line| lines << line.gsub(/[^a-z\,\;]/i,'') }
+File.open(ARGV[0]).readlines.each{ |line| lines << line.gsub!(/[^a-z\,\;]/i,'') }
 
 lines.each do |line|
-  cust_str, prod_str = line.split(/[;]/i)
-  next unless prod_str
-  customers = cust_str.split(/[,]/i)
-  next unless customers
-  products = prod_str.split(/[,]/i)
+  customers = line.split(/[;]/).first.split(/[,]/)
+  products = line.split(/[;]/).last.split(/,/)
   next unless products
-  pairs = products.product(customers)
-  maxes = 0
-  products.each do |prod|
+  pairs = products.product customers
+  maxs = []
+
+  products.each do |product|
     max = 0
-    product_pairs = pairs.select{ |c| c[0] = prod}
-    product_pairs.each do |pair|
+    product_pairs = pairs.select{ |pair| pair.first == product}
+    product_pairs.each  do|pair|
       ss = find_sutability(pair.first, pair.last)
       max = ss unless max >= ss
     end
-    maxes +=max
+    maxs << max
   end
- puts '%.2f' % maxes
+
+#  customers.each do |customer|
+#    sutability_hash = Hash.new
+#    products.each do |product|
+#      sutability_hash[product.to_s] = find_sutability(customer, product)
+#    end
+#    maxs << sutability_hash.values.max.round(2)
+#  end
+#  next unless maxs.count > 0
+  puts '%.2f' % maxs.inject(:+)
 end
