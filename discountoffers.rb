@@ -6,7 +6,7 @@ end
 
 def find_sutability cust, prod
   cust_l, prod_l = cust.length, prod.length
-  ss = prod_l.even? ? cust.scan(/[aeiouy]/i).length*1.5 : cust.scan(/[^aeiouy]/i).length.to_f*1.0
+  ss = prod_l.even? ? cust.scan(/[aeiouy]/i).length*1.5 : cust.scan(/[^aeiouy]/i).length*1.0
   ss *= have_common_factor(prod_l, cust_l) ? 1.5 : 1.0
 end
 
@@ -18,25 +18,16 @@ lines.each do |line|
   products = line.split(/[;]/).last.split(/,/)
   next unless products
   pairs = products.product customers
-  maxs = []
+  totals = []
 
-  products.each do |product|
-    max = 0
-    product_pairs = pairs.select{ |pair| pair.first == product}
-    product_pairs.each  do|pair|
-      ss = find_sutability(pair.first, pair.last)
-      max = ss unless max >= ss
+  customers.each do |customer|
+    total = 0
+    customer_pairs = pairs.select{ |pair| pair.last == customer}
+    customer_pairs.each  do|pair|
+      total += ss = find_sutability(customer, pair.first)
     end
-    maxs << max
+    totals << total
   end
 
-#  customers.each do |customer|
-#    sutability_hash = Hash.new
-#    products.each do |product|
-#      sutability_hash[product.to_s] = find_sutability(customer, product)
-#    end
-#    maxs << sutability_hash.values.max.round(2)
-#  end
-#  next unless maxs.count > 0
-  puts '%.2f' % maxs.inject(:+)
+  puts '%.2f' % totals.max
 end
