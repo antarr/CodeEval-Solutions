@@ -1,4 +1,7 @@
 ARGV[0] = 'poker.txt'
+
+
+
 class Card
   include Comparable
 
@@ -29,10 +32,11 @@ class Player
   attr_accessor :cards, :facestring, :suitstring
 
   include Enumerable
+#
+#  HAND_RANKS = ["RoyalFlush" => 10, "StraighFlush" => 9, "FourofKind" => 8,
+#               "FullHouse" => 7, "Flush" => 6, "Straight" => 5, "ThreeofKind" => 4,
+#                "TwoPair" => 3, "Pair" => 2, "HighCard" => 1]
 
-  HAND_RANKS = ["RoyalFlush" => 10, "StraighFlush" => 9, "FourofKind" => 8,
-               "FullHouse" => 7, "Flush" => 6, "Straight" => 5, "ThreeofKind" => 4,
-                "TwoPair" => 3, "Pair" => 2, "HighCard" => 1]
 
   def initialize
     @cards = []
@@ -60,16 +64,43 @@ class Player
   end
 
   def hand
-    return 10 if straight? && flush?  && @facestring.join('').scan(//).count > 0
-    return 9 if straight? && flush?
-    return 8 if fourofkind?
-    return 7 if fullhouse?
-    return 6 if flush?
-    return 5 if straight?
-    return 4 if threeofkind?
-    return 3 if twopair?
-    return 2 if pair?
-    return 1
+    @cards.sort!
+    return 10000+(@cards.last.value) if straight? && flush?  && @facestring.join('').scan(//).count > 0
+    return 9000+(@cards.last.value) if straight? && flush?
+    return 8000+rank if fourofkind?
+    return 7000+rank if fullhouse?
+    return 6000+(@cards.last.value) if flush?
+    return 5000+(@cards.last.value) if straight?
+    return 4000+rank if threeofkind?
+    return 3000+rank if twopair?
+    return 2000+(@cards.last.value) if pair?
+    return 1000+(@cards.last.value)
+  end
+
+  def rank
+    if fourofkind?
+      return @facestring.join('').scan(/#{@cards.first.face}/).count == 4 ?  @cards.first.value+@cards.last.value :  @cards.last.value+@cards.first.value
+    end
+    if fullhouse?
+      rank = 0
+      @cards.each{ |card| rank += card.value*10 if @facestring.join('').scan(/#{card.face}/).count == 3 }
+      @cards.each{ |card| rank += card.value if @facestring.join('').scan(/#{card.face}/).count == 2 }
+      return rank
+    end
+    if threeofkind?
+      rank = 0
+      kicker =0
+      @cards.each{ |card| rank = card.value*10 if @facestring.join('').scan(/#{card.face}/).count == 3 }
+      @cards.each{ |card| kicker = card.value if @facestring.join('').scan(/#{card.face}/).count == 1 && card.value > kicker }
+      return rank+kicker
+    end
+    if twopair?
+      rank = 0
+      kicker = 0
+      @cards.each{ |card| rank = card.value*10 if @facestring.join('').scan(/#{card.face}/).count == 2 && card.value > rank }
+      @cards.each{ |card| kicker = card.value if @facestring.join('').scan(/#{card.face}/).count == 1 && card.value > kicker }
+      rank + kicker
+    end
   end
 
   def straight?
