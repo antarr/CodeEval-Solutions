@@ -21,5 +21,5 @@ while count < 1000 do
   end
   current +=1
 end
-    
+
 puts sum

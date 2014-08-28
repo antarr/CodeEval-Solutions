@@ -4,7 +4,7 @@ File.open(ARGV.first).readlines.each { |line| lines << line.strip }
 
 def print_multiplier(f, d)
   current = d
-  multiplier = 2    
+  multiplier = 2
   while current <= f do
     current = d * multiplier
     multiplier += 1

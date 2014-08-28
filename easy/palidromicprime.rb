@@ -12,7 +12,7 @@ def isPrime(number)
 end
 
 def isPalidrome number
-  return false unless number.to_s.reverse == number.to_s  
+  return false unless number.to_s.reverse == number.to_s
   true
 end
 

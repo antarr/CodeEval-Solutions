@@ -2,7 +2,7 @@ lines  = []
 
 File.open(ARGV.first).readlines.each { |line| lines << line.strip }
 
-lines.each do |line|   
+lines.each do |line|
   if line == '' then
     next
   else
