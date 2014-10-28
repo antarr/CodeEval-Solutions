@@ -1,10 +1,9 @@
 def isValid str
   return true if str.empty?
-  return false if str.length.odd?
-  isValid(str.gsub("()",""))
+  return false if str.scan(/\{\}|\(\)|\[\]/).empty?
+  isValid(str.gsub!(/\{\}|\(\)|\[\]/,""))
 end
 File.open(ARGV[0]).each_line do |line|
  next if line.chomp!.empty?
- parentheses = line.scan(/[\(\)]/).join.gsub("()","")
- puts isValid(parentheses) ? "True" : "False"
+ puts isValid(line) ? "True" : "False"
 end
